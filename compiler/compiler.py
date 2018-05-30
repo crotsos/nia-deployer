@@ -57,7 +57,7 @@ def compile(nile_intent):
     for mb in middleboxes:
         mb_start = 'firewall' if mb == 'firewall' else 'snort'
         mb_start_cmd = './start_{}.sh 100 100 100 100 "128KB" 0 &'.format(mb_start)
-        mb_sh = 'echo {};\nvim-emu compute start -d vnfs_dc -n {} -i rjpfitscher/genic-vnf --net "(id=input,ip=10.0.0.{}0/24),(id=output,ip=10.0.0.{}1/24)" -c {};\n'.format(
+        mb_sh = 'echo {}\nvim-emu compute start -d vnfs_dc -n {} -i rjpfitscher/genic-vnf --net "(id=input,ip=10.0.0.{}0/24),(id=output,ip=10.0.0.{}1/24)" -c {}\n'.format(
             mb, mb, ip, ip, mb_start_cmd)
         ip += 1
         compiled += mb_sh
@@ -66,16 +66,16 @@ def compile(nile_intent):
     for idx, mb in enumerate(middleboxes):
         if idx == 0:
             src = src_targets[0]
-            src_sh = 'echo {};\nvim-emu network add -b -src {}:eth0 -dst {}:input;\n'.format(src + '-' + mb, src, mb)
+            src_sh = 'echo {}\nvim-emu network add -b -src {}:eth0 -dst {}:input\n'.format(src + '-' + mb, src, mb)
             compiled += src_sh
         elif idx == len(middleboxes) - 1:
             dest = dest_targets[0]
-            dest_sh = 'echo {};\nvim-emu network add -b -src {}:output -dst {}:eth0;\n'.format(mb + '-' + dest, mb, dest)
+            dest_sh = 'echo {}\nvim-emu network add -b -src {}:output -dst {}:eth0\n'.format(mb + '-' + dest, mb, dest)
             compiled += dest_sh
 
         if idx != len(middleboxes) - 1:
             next_mb = middleboxes[idx + 1]
-            chain_mb_sh = 'echo {};\nvim-emu network add -b -src {}:output -dst {}:input;\n'.format(mb + '-' + next_mb, mb, next_mb)
+            chain_mb_sh = 'echo {}\nvim-emu network add -b -src {}:output -dst {}:input\n'.format(mb + '-' + next_mb, mb, next_mb)
             compiled += chain_mb_sh
 
     return compiled
