@@ -55,7 +55,10 @@ def compile(nile_intent):
     ip = 3
     # creating middleboxes
     for mb in middleboxes:
-        mb_sh = 'echo {};\nvim-emu compute start -d vnfs_dc -n {} -i rjpfitscher/genic-vnf --net "(id=input,ip=10.0.0.{}0/24),(id=output,ip=10.0.0.{}1/24)";\n'.format(mb, mb, ip, ip)
+        mb_start = 'firewall' if mb == 'firewall' else 'snort'
+        mb_start_cmd = './start_{}.sh 100 100 100 100 "128KB" 0 &'.format(mb_start)
+        mb_sh = 'echo {};\nvim-emu compute start -d vnfs_dc -n {} -i rjpfitscher/genic-vnf --net "(id=input,ip=10.0.0.{}0/24),(id=output,ip=10.0.0.{}1/24)" -c {};\n'.format(
+            mb, mb, ip, ip, mb_start_cmd)
         ip += 1
         compiled += mb_sh
 
@@ -78,6 +81,18 @@ def compile(nile_intent):
     return compiled
 
 
+def deploy(policy):
+    try:
+        script_name = 'res/scripts/{}_intent.sh'.format(datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H%M%S'))
+        with open(script_name, 'w') as script:
+            script.write(policy)
+            os.chmod(script_name, 0o777)
+
+        subprocess.check_call('./' + script_name, stderr=subprocess.STDOUT, shell=True)
+    except subprocess.CalledProcessError as err:
+        raise ValueError('Deployment of compiled intent failed. Error: {}'.format(err))
+
+
 def handle_request(request):
     status = {
         'code': 200,
@@ -88,23 +103,12 @@ def handle_request(request):
     policy = None
     try:
         policy = compile(intent)
-        script_name = 'res/scripts/{}_intent.sh'.format(datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H%M%S'))
-        with open(script_name, 'w') as script:
-            script.write(policy)
-            os.chmod(script_name, 0o777)
-
-        subprocess.check_call('./' + script_name, stderr=subprocess.STDOUT, shell=True)
+        deploy(policy)
     except ValueError as err:
         print 'Error: {}'.format(err)
         status = {
             'code': 404,
             'details': str(err)
-        }
-    except subprocess.CalledProcessError as err:
-        print 'Error: {}'.format(err)
-        status = {
-            'code': 404,
-            'details': 'Deployment of compiled intent failed. Error: {}'.format(err)
         }
 
     return {
