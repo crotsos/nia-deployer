@@ -66,11 +66,11 @@ def compile(nile_intent):
     for idx, mb in enumerate(middleboxes):
         if idx == 0:
             src = src_targets[0]
-            src_sh = 'echo {}\nvim-emu network add -b -src {}:eth0 -dst {}:input\n'.format(src + '-' + mb, src, mb)
+            src_sh = 'echo {}\nvim-emu network add -b -src {}:client-eth0 -dst {}:input\n'.format(src + '-' + mb, src, mb)
             compiled += src_sh
         elif idx == len(middleboxes) - 1:
             dest = dest_targets[0]
-            dest_sh = 'echo {}\nvim-emu network add -b -src {}:output -dst {}:eth0\n'.format(mb + '-' + dest, mb, dest)
+            dest_sh = 'echo {}\nvim-emu network add -b -src {}:output -dst {}:server-eth0\n'.format(mb + '-' + dest, mb, dest)
             compiled += dest_sh
 
         if idx != len(middleboxes) - 1:
