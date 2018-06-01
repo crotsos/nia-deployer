@@ -56,7 +56,7 @@ def compile(nile_intent):
     # creating middleboxes
     for mb in middleboxes:
         mb_start = 'firewall' if mb == 'firewall' else 'snort'
-        mb_start_cmd = './start_{}.sh 100 100 100 100 "128KB" 0 &'.format(mb_start)
+        mb_start_cmd = '"./start_{}.sh 100 100 100 100 \"128KB\" 0 &"'.format(mb_start)
         mb_sh = 'echo {}\nvim-emu compute start -d vnfs_dc -n {} -i rjpfitscher/genic-vnf --net "(id=input,ip=10.0.0.{}0/24),(id=output,ip=10.0.0.{}1/24)" -c {}\n'.format(
             mb, mb, ip, ip, mb_start_cmd)
         ip += 1
