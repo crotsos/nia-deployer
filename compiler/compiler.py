@@ -32,10 +32,13 @@ def extract_values(nile_intent, op, value_id):
     op_idx = nile_intent.find(op)
     if op_idx >= 0:
         extracted_op = extract_operation(nile_intent, op, op_idx)
+        extracted_op = re.sub('\s(?=[^\(\)]*\))', '-', extracted_op) #reaplce spaces inside values for dividers
         for term in extracted_op.replace(op, '').strip().split():
+            print term
             m = re.search(value_id + '\((.+)\)(,?)', term)
             if m:
                 values.append(m.group(1).replace('\'', ''))
+    print values
     return values
 
 
@@ -52,10 +55,10 @@ def compile(nile_intent):
     if not src_targets or not dest_targets:
         raise ValueError('No targets provided. Ask the user again.')
 
-    ip = 3
+    ip = 2
     # creating middleboxes
     for mb in middleboxes:
-        mb_start = 'firewall' if mb == 'firewall' else 'snort'
+        mb_start = 'firewall' if mb == 'firewall' else 'snort' # support only firewall and ids middleboxes
         mb_start_cmd = '"./start_{}.sh 100 100 100 100 \'128KB\' 0 &"'.format(mb_start)
         mb_sh = 'echo {}\nvim-emu compute start -d vnfs_dc -n {} -i rjpfitscher/genic-vnf --net "(id=input,ip=10.0.0.{}0/24),(id=output,ip=10.0.0.{}1/24)" -c {}\n'.format(
             mb, mb, ip, ip, mb_start_cmd)
