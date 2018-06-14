@@ -6,9 +6,13 @@ import time
 
 import config
 import mappings
+import json
 
 m = {}
 
+def load_json_topology(filename):
+    data = json.loads(open(filename).read())
+    return data['topology']
 
 def compile_alt(nile_intent):
     compiled = None
