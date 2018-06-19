@@ -12,7 +12,13 @@ m = {}
 
 def load_json_topology(filename):
     data = json.loads(open(filename).read())
-    return data['topology']
+
+    getkey = lambda x: data['topology'][x] if x in data['topology'] else []
+
+    devices = getkey('devices')
+    middleboxes = getkey('middleboxes')
+    switches = getkey('switches')
+    links = getkey('links')
 
 def compile_alt(nile_intent):
     compiled = None

@@ -1,10 +1,17 @@
 {
   "topology":{
+    "config":{
+      "type":"SDN",
+      "controller":{
+        "ip":"10.0.1.100",
+        "port":5533
+      }
+    },
     "devices":[
       {
         "ip":"10.0.0.1",
         "hostname":"client-pc",
-        "synonyms":[
+        "handles":[
           "client",
           "host",
           "desktop"
@@ -12,14 +19,15 @@
       },
       {
         "ip":"10.0.0.2",
-        "hostname":"test-pc"
+        "hostname":"client2-pc",
+        "handles":[
+          "client",
+          "host",
+          "desktop"
+        ]
       }
     ],
     "middleboxes":[
-      {
-        "ip":"10.0.1.1",
-        "type":"router"
-      },
       {
         "ip":"10.0.1.2",
         "type":"firewall",
@@ -35,18 +43,26 @@
         ]
       }
     ],
+    "switches":[
+      {
+        "ip":"10.0.1.1"
+      }
+    ],
     "links":[
       {
         "source":"10.0.0.1",
-        "target":"10.0.1.1"
+        "target":"10.0.1.1",
+        "capacity":"100Mbps"
       },
       {
         "source":"10.0.0.2",
-        "target":"10.0.1.1"
+        "target":"10.0.1.1",
+        "capacity":"100Mbps"
       },
       {
         "source":"10.0.1.2",
-        "target":"10.0.1.1"
+        "target":"10.0.1.1",
+        "capacity":"1Gbps"
       }
     ]
   }
