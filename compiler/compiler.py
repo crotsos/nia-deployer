@@ -7,8 +7,18 @@ import time
 import config
 import mappings
 import json
+import parser
 
 m = {}
+
+def list_handles(elements, key):
+    handles = {}
+    for e in elements:
+        id = e[key]
+        for h in e['handles']:
+            handles[h] = id
+    print("handles", handles)
+    return handles
 
 def load_json_topology(filename):
     data = json.loads(open(filename).read())
@@ -20,13 +30,10 @@ def load_json_topology(filename):
     switches = getkey('switches')
     links = getkey('links')
 
-def compile_alt(nile_intent):
-    compiled = None
-    intent = re.sub(' +', ' ', nile_intent.split('Intent:')[1].strip())
-    if intent in m:
-        compiled = m[intent]
-    return compiled
+    devices_handles = list_handles(devices, 'hostname')
+    middleboxes_handles = list_handles(middleboxes, 'type')
 
+    return {'devices':devices_handles,'middleboxes':middleboxes_handles}
 
 def extract_operation(nile_intent, op, op_idx):
     extracted_op = nile_intent[op_idx:].replace(op, '')
@@ -93,6 +100,38 @@ def compile(nile_intent):
 
     return compiled
 
+def compile_yacc(nile_intent):
+    policy = ''
+
+    filename = 'res/topology.json'
+    handles = load_json_topology(filename)
+
+    parser.yacc_compile(nile_intent)
+
+    endpoints = parser.endpoints
+    middleboxes = parser.middleboxes
+
+    if not middleboxes:
+        raise ValueError('No middlebox provided. Ask the user again.')
+
+    if len(endpoints) < 2:
+        raise ValueError('No targets provided. Ask the user again.')
+
+    if endpoints[0] not in handles['devices'].keys():
+        raise ValueError('Client '+endpoints[0]+' not found')
+    policy += 'Endpoint 1: '+ handles['devices'][endpoints[0]]
+
+    if endpoints[1] not in handles['devices'].keys():
+        raise ValueError('Client '+endpoints[1]+' not found')
+    policy += '\nEndpoint 2: '+ handles['devices'][endpoints[1]]
+
+    for middlebox in middleboxes:
+        if middlebox not in handles['middleboxes'].keys():
+            raise ValueError('Middlebox '+middlebox+' not found')
+        policy += '\nAdd middlebox: '+handles['middleboxes'][middlebox]
+
+    return policy
+
 
 def deploy(policy):
     try:
@@ -115,8 +154,8 @@ def handle_request(request):
     intent = request.get('intent')
     policy = None
     try:
-        policy = compile(intent)
-        deploy(policy)
+        policy = compile_yacc(intent)
+        #deploy(policy)
     except ValueError as err:
         print 'Error: {}'.format(err)
         status = {

@@ -14,16 +14,17 @@
         "handles":[
           "client",
           "host",
-          "desktop"
+          "desktop",
+          "PC"
         ]
       },
       {
         "ip":"10.0.0.2",
-        "hostname":"client2-pc",
+        "hostname":"web-server",
         "handles":[
-          "client",
-          "host",
-          "desktop"
+          "webserver",
+          "server",
+          "apache"
         ]
       }
     ],
@@ -31,6 +32,10 @@
       {
         "ip":"10.0.1.2",
         "type":"firewall",
+        "handles":[
+          "packetfilter",
+          "firewall"
+        ],
         "roles":[
           "security"
         ]
@@ -38,6 +43,9 @@
       {
         "ip":"10.0.1.3",
         "type":"ids",
+        "handles":[
+          "ids"
+        ],
         "roles":[
           "security"
         ]
